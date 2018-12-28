@@ -1,0 +1,4 @@
+BOOTMAGIC_ENABLE = lite
+EXTRAFLAGS += -flto
+NKRO_ENABLE = yes
+
