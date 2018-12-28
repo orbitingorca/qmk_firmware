@@ -1,4 +1,4 @@
-orbiting Orca's hhkb layout
+Orbiting Orca's hhkb layout
 ======================
 
 ## features:
