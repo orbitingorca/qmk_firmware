@@ -1,4 +1,5 @@
 #include QMK_KEYBOARD_H
+#include "version.h"
 
 enum layer_names {
   _BASE,
@@ -18,6 +19,7 @@ enum layer_names {
 
 enum custom_keycodes {
     FUN_SIN = SAFE_RANGE,
+    QMK_VER,
     M_LOCAL,
     M_RANDOM
 };
@@ -57,7 +59,7 @@ enum custom_keycodes {
 #define G_FUN_R4      _______, KC_NUBS, _______, _______, _______, _______, LOCK_NUM,LOCK_MOV,KC_VOLD, KC_VOLU, KC_MUTE, _______, _______
 
 /* space + function (adjust) layer */
-#define G_ADJUST_R1   KC_PWR,  KC_F13,  KC_F14,  KC_F15,  KC_F16,  XXXXXXX, TG_NKRO, XXXXXXX, XXXXXXX, XXXXXXX, BL_TOGG, BL_DEC,  BL_INC,  XXXXXXX, RESET
+#define G_ADJUST_R1   KC_PWR,  KC_F13,  KC_F14,  KC_F15,  KC_F16,  XXXXXXX, TG_NKRO, XXXXXXX, XXXXXXX, XXXXXXX, BL_TOGG, BL_DEC,  BL_INC,  QMK_VER, RESET
 #define G_ADJUST_R2   _______, RGB_M_P, RGB_M_B, RGB_M_R, RGB_M_SW,RGB_M_SN,RGB_M_K, RGB_M_X, RGB_M_G, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, _______
 #define G_ADJUST_R3   _______, M_RANDOM,XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, M_LOCAL, XXXXXXX, XXXXXXX, _______
 #define G_ADJUST_R4   _______, XXXXXXX, RGB_TOG, RGB_MOD, RGB_HUD, RGB_HUI, RGB_SAD, RGB_SAI, RGB_VAD, RGB_VAI, XXXXXXX, _______, _______
@@ -143,6 +145,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case M_RANDOM:
       if (record->event.pressed) {
         tap_random_base64();
+      }
+      return false;
+      break;
+    case QMK_VER:
+      if (record->event.pressed) {
+        send_string(QMK_VERSION);
       }
       return false;
       break;
