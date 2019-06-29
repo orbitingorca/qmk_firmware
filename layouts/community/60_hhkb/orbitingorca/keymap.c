@@ -1,15 +1,6 @@
 #include QMK_KEYBOARD_H
 #include "version.h"
 
-enum layer_names {
-  _BASE,
-  _NUMBER,
-  _MOVE ,
-  _SPACE,
-  _FUN,
-  _ADJUST
-};
-
 // keys
 #define SPACEFN LT(_SPACE, KC_SPACE)
 #define GUI_DEL RGUI_T(KC_DEL)
@@ -21,7 +12,21 @@ enum custom_keycodes {
     FUN_SIN = SAFE_RANGE,
     QMK_VER,
     M_LOCAL,
-    M_RANDOM
+    M_RANDOM,
+    SECRET_1,
+    SECRET_2,
+    SECRET_3,
+    SECRET_4,
+    SECRET_5,
+};
+
+enum layer_names {
+  _BASE,
+  _NUMBER,
+  _MOVE ,
+  _SPACE,
+  _FUN,
+  _ADJUST
 };
 
 /*
@@ -83,7 +88,7 @@ enum custom_keycodes {
  * +-----------------------------------------------------------------------------------------+
  * | CAPS   |     |MACL0|MACL1|MACL2|     |CALC |     |PRTSC│SCLCK│PAUSE|     |     |        |
  * +-----------------------------------------------------------------------------------------+
- * |         |APP  |     |     |     |     |WHOM |     |MPRV |MPLAY|MNXT |     |             |
+ * |         |APP  |LOCK |     |     |     |WHOM |     |MPRV |MPLAY|MNXT |     |             |
  * +-----------------------------------------------------------------------------------------+
  * |           |NUBS |     |     |     |     | NUM | MOV |VOLUP|VOLDN|MUTE |           |     |
  * +-----------------------------------------------------------------------------------------+
@@ -92,13 +97,13 @@ enum custom_keycodes {
  *
  *                                   ******** ADJUST ********
  * .-----------------------------------------------------------------------------------------.
- * |PWR  |     |     |     |     |     |6/NRO|     |     |     |BL_TG|BL_DN|BL_UP|Q_VER|RESET|
+ * |PWR  |     |     |     |     |     |6/NRO|     |     |     |BL TG|BL DN|BL UP|Q_VER|RESET|
  * +-----------------------------------------------------------------------------------------+
  * |        |     |     |     |     |     |     |     |     |     |     |     |     |        |
  * +-----------------------------------------------------------------------------------------+
  * |         |     |     |     |     |     |     |     |     |     |     |     |             |
  * +-----------------------------------------------------------------------------------------+
- * |           |     |RGBTG|RGBMOD|     |     |     |     |     |     |           |     |
+ * |           |     |UG TG|UG MO|UG H+|UG H-|UG S-|UG S-|UG V+|UG V-|           |     |
  * +-----------------------------------------------------------------------------------------+
  *         |     |       |                                          |        |     |
  *         `-----------------------------------------------------------------------'
@@ -140,7 +145,7 @@ enum custom_keycodes {
 /* space + function (adjust) layer */
 #define G_ADJUST_R1   KC_PWR,  KC_F13,  KC_F14,  KC_F15,  KC_F16,  XXXXXXX, TG_NKRO, XXXXXXX, XXXXXXX, XXXXXXX, BL_TOGG, BL_DEC,  BL_INC,  QMK_VER, RESET
 #define G_ADJUST_R2   _______, RGB_M_P, RGB_M_B, RGB_M_R, RGB_M_SW,RGB_M_SN,RGB_M_K, RGB_M_X, RGB_M_G, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, _______
-#define G_ADJUST_R3   _______, M_RANDOM,XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, M_LOCAL, XXXXXXX, XXXXXXX, _______
+#define G_ADJUST_R3   _______, SECRET_1,SECRET_2,SECRET_3,SECRET_4,SECRET_5,XXXXXXX, XXXXXXX, XXXXXXX, M_LOCAL, XXXXXXX, XXXXXXX, _______
 #define G_ADJUST_R4   _______, XXXXXXX, RGB_TOG, RGB_MOD, RGB_HUD, RGB_HUI, RGB_SAD, RGB_SAI, RGB_VAD, RGB_VAI, XXXXXXX, _______, _______
 
 
@@ -195,10 +200,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 };
 
+bool process_record_secrets(uint16_t keycode, keyrecord_t *record);
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   static uint16_t key_timer;
   switch (keycode) {
+    // tap: do shift-ins which is paste including terminals in windows and linux. hold: function key
     case FUN_SIN:
       if (record->event.pressed) {
         layer_on(_FUN);
@@ -221,12 +228,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       return false;
       break;
-    case M_RANDOM:
-      if (record->event.pressed) {
-        tap_random_base64();
-      }
-      return false;
-      break;
     case QMK_VER:
       if (record->event.pressed) {
         send_string(QMK_VERSION);
@@ -234,10 +235,36 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return false;
       break;
   }
-  return true;
+  return process_record_secrets(keycode, record);
 }
 
 uint32_t layer_state_set_user(uint32_t state) {
   return update_tri_layer_state(state, _FUN, _SPACE, _ADJUST);
 }
 
+// ##### SECRETS
+// copied from user/drashna
+
+#if (__has_include("secrets.h"))
+#include "secrets.h"
+#else
+static const char * const secrets[] = {
+  "test1",
+  "test2",
+  "test3",
+  "test4",
+  "test5"
+};
+#endif
+
+bool process_record_secrets(uint16_t keycode, keyrecord_t *record) {
+  switch (keycode) {
+    case SECRET_1 ... SECRET_5: // Secrets!  Externally defined strings, not stored in repo
+      if (!record->event.pressed) {
+        send_string_with_delay(secrets[keycode - SECRET_1], 1);
+      }
+      return false;
+      break;
+  }
+  return true;
+}
