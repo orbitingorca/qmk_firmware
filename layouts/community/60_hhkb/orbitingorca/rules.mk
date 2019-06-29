@@ -1,4 +1,5 @@
 BOOTMAGIC_ENABLE = lite
 EXTRAFLAGS += -flto
 NKRO_ENABLE = yes
+KEY_LOCK_ENABLE = yes
 
